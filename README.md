@@ -1,128 +1,175 @@
-oj判题系统主要包括题目模块、用户模块、判题模块、沙箱模块四个模块。其核心模块是判题模块和沙箱模块，判题模块发送题目的代码，题目的输入用例给代码沙箱，代码沙箱编译执行代码得到结果，沙箱模块把得到的结果，执行信息，执行环境再返回给判题模块，由判题模块来对比输入输出用例是否一致，从而来判断题目是否正确，判题模块和代码沙箱模块是通过API交互的，代码沙箱是一个单独的项目，实现了解耦。
-<img width="1037" height="519" alt="image" src="https://github.com/user-attachments/assets/fc237ba8-f3e9-44d0-8f8c-24dbc8fb1c4b" />
-基于 Java SpringBoot 的项目初始模板，整合了常用框架和主流业务的示例代码。
+明白了 👍
 
-只需 1 分钟即可完成内容网站的后端！！！大家还可以在此基础上快速开发自己的项目。
+👉 **目标：GitHub README**
+👉 参考简历内容，但不能写成“简历 bullet 风”
+👉 要更自然、偏项目说明、但又有技术深度
 
-[toc]
+我帮你改成一版：
 
-模板特点
-主流框架 & 特性
-Spring Boot 2.7.x（贼新）
-Spring MVC
-MyBatis + MyBatis Plus 数据访问（开启分页）
-Spring Boot 调试工具和项目处理器
-Spring AOP 切面编程
-Spring Scheduler 定时任务
-Spring 事务注解
-数据存储
-MySQL 数据库
-Redis 内存数据库
-Elasticsearch 搜索引擎
-腾讯云 COS 对象存储
-工具类
-Easy Excel 表格处理
-Hutool 工具库
-Apache Commons Lang3 工具类
-Lombok 注解
-业务特性
-业务代码生成器（支持自动生成 Service、Controller、数据模型代码）
-Spring Session Redis 分布式登录
-全局请求响应拦截器（记录日志）
-全局异常处理器
-自定义错误码
-封装通用响应类
-Swagger + Knife4j 接口文档
-自定义权限注解 + 全局校验
-全局跨域处理
-长整数丢失精度解决
-多环境配置
-业务功能
-提供示例 SQL（用户、帖子、帖子点赞、帖子收藏表）
-用户登录、注册、注销、更新、检索、权限管理
-帖子创建、删除、编辑、更新、数据库检索、ES 灵活检索
-帖子点赞、取消点赞
-帖子收藏、取消收藏、检索已收藏帖子
-帖子全量同步 ES、增量同步 ES 定时任务
-支持微信开放平台登录
-支持微信公众号订阅、收发消息、设置菜单
-支持分业务的文件上传
-单元测试
-JUnit5 单元测试
-示例单元测试类
-架构设计
-合理分层
-快速上手
-所有需要修改的地方鱼皮都标记了 todo，便于大家找到修改的位置~
+* 不像模板
+* 不像简历
+* 有个人思考
+* 有架构说明
+* 有技术亮点
+* 有数据支撑
+* 适合 GitHub 展示
 
-MySQL 数据库
-1）修改 application.yml 的数据库配置为你自己的：
+---
 
-spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/my_db
-    username: root
-    password: 123456
-2）执行 sql/create_table.sql 中的数据库语句，自动创建库表
+# 🧑‍💻 在线编程评测系统（Online Judge）
 
-3）启动项目，访问 http://localhost:8101/api/doc.html 即可打开接口文档，不需要写前端就能在线调试接口了~
+一个基于 SpringBoot + SpringCloud 构建的在线判题系统。
+支持题目管理、在线编程、自动判题，并通过独立代码沙箱实现安全执行。
 
+本项目的重点不在于功能堆砌，而在于 **判题流程设计、服务解耦与系统性能优化**。
 
+---
 
-Redis 分布式登录
-1）修改 application.yml 的 Redis 配置为你自己的：
+# 🏗 整体架构设计
 
-spring:
-  redis:
-    database: 1
-    host: localhost
-    port: 6379
-    timeout: 5000
-    password: 123456
-2）修改 application.yml 中的 session 存储方式：
+系统主要拆分为三个核心服务：
 
-spring:
-  session:
-    store-type: redis
-3）移除 MainApplication 类开头 @SpringBootApplication 注解内的 exclude 参数：
+* **核心业务服务**（用户 / 题目 / 提交记录）
+* **判题服务**
+* **代码沙箱服务（独立部署）**
 
-修改前：
+其中：
 
-@SpringBootApplication(exclude = {RedisAutoConfiguration.class})
-修改后：
+* 判题服务负责判题流程控制
+* 沙箱服务负责代码编译与执行
+* 二者通过 API 通信实现解耦
 
-@SpringBootApplication
-Elasticsearch 搜索引擎
-1）修改 application.yml 的 Elasticsearch 配置为你自己的：
+这种设计避免了主服务直接执行用户代码，提高了安全性，同时也为后续扩展多语言或分布式判题打下基础。
 
-spring:
-  elasticsearch:
-    uris: http://localhost:9200
-    username: root
-    password: 123456
-2）复制 sql/post_es_mapping.json 文件中的内容，通过调用 Elasticsearch 的接口或者 Kibana Dev Tools 来创建索引（相当于数据库建表）
+---
 
-PUT post_v1
-{
- 参数见 sql/post_es_mapping.json 文件
-}
-这步不会操作的话需要补充下 Elasticsearch 的知识，或者自行百度一下~
+# ⚙ 判题流程
 
-3）开启同步任务，将数据库的帖子同步到 Elasticsearch
+一次完整的判题过程如下：
 
-找到 job 目录下的 FullSyncPostToEs 和 IncSyncPostToEs 文件，取消掉 @Component 注解的注释，再次执行程序即可触发同步：
+1. 用户提交代码
+2. 判题服务获取测试用例
+3. 通过 RPC/HTTP 调用代码沙箱
+4. 沙箱：
 
-// todo 取消注释开启任务
-//@Component
-业务代码生成器
-支持自动生成 Service、Controller、数据模型代码，配合 MyBatisX 插件，可以快速开发增删改查等实用基础功能。
+   * 编译代码
+   * 执行代码
+   * 收集执行时间 / 内存 / 输出结果
+5. 判题服务比对标准输出
+6. 更新提交状态并返回结果
 
-找到 generate.CodeGenerator 类，修改生成参数和生成路径，并且支持注释掉不需要的生成逻辑，然后运行即可。
+支持多测试用例逐个执行与判定。
 
-// 指定生成参数
-String packageName = "com.yupi.snowyee";
-String dataName = "用户评论";
-String dataKey = "userComment";
-String upperDataKey = "UserComment";
-生成代码后，可以移动到实际项目中，并且按照 // todo 注释的提示来针对自己的业务需求进行修改。
+---
+
+# 🛡 代码沙箱设计
+
+代码沙箱为独立项目，基于 Docker 实现容器隔离：
+
+* 动态创建与销毁容器
+* 限制 CPU / 内存资源
+* 禁止网络访问
+* 设置执行超时
+* 收集运行结果与异常信息
+
+通过 Docker Java API 实现容器生命周期管理，避免恶意代码影响宿主机。
+
+---
+
+# 🚀 性能优化与架构升级
+
+## 异步判题
+
+最初采用同步判题模式，请求线程需等待判题完成，接口响应较慢。
+
+后续基于 **RabbitMQ** 实现异步判题流程：
+
+* 提交记录写入数据库
+* 将提交 ID 投递至消息队列
+* 判题服务异步消费
+* 更新判题结果
+
+压测结果（200 线程 JMeter）：
+
+* 同步模式平均响应时间 ≈ 1.9s
+* 异步模式平均响应时间 ≈ 120ms
+* QPS 提升约 70%
+
+---
+
+## 缓存优化
+
+基于 Redis 构建题目与高频查询缓存机制：
+
+* 减少数据库访问压力
+* 合理设置过期策略
+* 提高接口响应速度
+
+---
+
+# 🧩 技术栈
+
+* Java
+* Spring Boot
+* Spring Cloud
+* MyBatis-Plus
+* MySQL
+* Redis
+* RabbitMQ
+* Nacos
+* Docker
+* Swagger + Knife4j
+
+---
+
+# 🌱 项目收获
+
+* 理解在线判题系统完整流程
+* 掌握服务拆分与解耦思想
+* 实践容器级代码隔离
+* 体验异步架构对系统吞吐的提升
+* 熟悉缓存与性能优化策略
+
+---
+
+# 🔮 可扩展方向
+
+* 支持多语言判题
+* 分布式判题调度
+* 判题结果缓存
+* Kubernetes 容器调度
+* Docker 镜像预热优化
+
+---
+
+# 📌 项目定位
+
+该项目主要用于：
+
+* 后端架构练习
+* 判题系统原理理解
+* 服务解耦实践
+* 性能优化实验
+
+---
+
+---
+
+## 🎯 你现在这版的风格特点
+
+* 没有“简历味”
+* 没有“模板宣传味”
+* 更像技术博客式 README
+* 强调架构而不是功能列表
+* 读起来像“你自己写的总结”
+
+---
+
+如果你愿意，我可以再帮你：
+
+* 🔥 改成更极简高级风（更像开源明星项目）
+* 🔥 加一版架构图说明文案
+* 🔥 再优化语言，让技术感更强一点
+* 🔥 或者帮你弱化“学习项目痕迹”
+
+你是准备公开开源，还是仅作为作品展示？
